@@ -2,15 +2,17 @@ function genJSON(dataset)
     addpath('../testing/util');
     addpath('../testing/util/jsonlab/');
 
+    data_dir = '/media/data/datasets/coco/'
+
     if(strcmp(dataset, 'COCO'))
-        mkdir('dataset/COCO/json')
+        mkdir([data_dir 'pose-paf/json'])
         count = 1;
         makeFigure = 0;
-        validationCount = 0;
+        % validationCount = 0;
         isValidation = 0;
         
-        load('dataset/COCO/mat/coco_kpt.mat');
-        load('dataset/COCO/mat/coco_val.mat');
+        load([data_dir 'pose-paf/mat/coco_kpt.mat']);
+        load([data_dir 'pose-paf/mat/coco_val.mat']);
         
         for mode = 0:1
             if mode == 0
@@ -33,13 +35,14 @@ function genJSON(dataset)
                 prev_center = [];
 
                 if mode == 1
-                    if i < 2645
-                        validationCount = validationCount + 1;
-                        fprintf('My validation! %d, %d\n', i, validationCount);
-                        isValidation = 1;
-                    else
-                        isValidation = 0;
-                    end
+                    % if i < 2645
+                    %     validationCount = validationCount + 1;
+                    %     fprintf('My validation! %d, %d\n', i, validationCount);
+                    %     isValidation = 1;
+                    % else
+                    %     isValidation = 0;
+                    % end
+                    isValidation = 1;
                 else
                     isValidation = 0;
                 end
@@ -78,9 +81,9 @@ function genJSON(dataset)
 
                     % set image path
                     if mode == 0
-                        joint_all(count).img_paths = sprintf('train2014/COCO_train2014_%012d.jpg', RELEASE(i).image_id);
+                        joint_all(count).img_paths = sprintf('train2017/%012d.jpg', RELEASE(i).image_id);
                     else
-                        joint_all(count).img_paths = sprintf('val2014/COCO_val2014_%012d.jpg', RELEASE(i).image_id);
+                        joint_all(count).img_paths = sprintf('val2017/%012d.jpg', RELEASE(i).image_id);
                     end
                     %joint_all(count).img_paths = RELEASE(i).image_id;
                     %[h,w,~] = size(imread(['../dataset/COCO/images/', joint_all(count).img_paths]));
@@ -154,7 +157,7 @@ function genJSON(dataset)
                     joint_all(count).numOtherPeople = length(joint_all(count).joint_others);
 
                     if(makeFigure) % visualizing to debug
-                        imshow(['dataset/COCO/images/', joint_all(count).img_paths]);
+                        imshow([data_dir, 'images/', joint_all(count).img_paths]);
                         xlim([-joint_all(count).img_width*0.6 joint_all(count).img_width*1.6]) 
                         ylim([-joint_all(count).img_height*0.6 joint_all(count).img_height*1.6])
                         hold on;
@@ -189,7 +192,7 @@ function genJSON(dataset)
             end
         end
         
-        opt.FileName = 'dataset/COCO/json/COCO.json';
+        opt.FileName = [data_dir 'pose-paf/json/COCO.json'];
         opt.FloatFormat = '%.3f';
         savejson('root', joint_all, opt);
     end 

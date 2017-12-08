@@ -41,7 +41,7 @@ param.merge = 'avg';
 
 
 % path of your caffe
-caffepath = '/home/zhecao/caffe/matlab';
+caffepath = '/home/shaofeiw/Development/caffe_train/matlab';
 
 %COCO parameter
 if id == 1
@@ -50,8 +50,8 @@ if id == 1
     param.thre2 = 0.05; 
     param.thre3 = 0.5; 
 
-    param.model(id).caffemodel = '../model/_trained_COCO/pose_iter_440000.caffemodel';
-    param.model(id).deployFile = '../model/_trained_COCO/pose_deploy.prototxt';
+    param.model(id).caffemodel = '/media/data/datasets/coco/pose-paf/arch/COCO_exp_caffe/pose56/exp22/model/pose_iter_80000.caffemodel';
+    param.model(id).deployFile = '/media/data/datasets/coco/pose-paf/COCO_kpt/pose56/exp22/pose_deploy.prototxt';
     param.model(id).description = 'COCO Pose56 Two-level Linevec';
     param.model(id).boxsize = 368;
     param.model(id).padValue = 128;

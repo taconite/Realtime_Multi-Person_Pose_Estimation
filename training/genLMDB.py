@@ -5,10 +5,12 @@ import cv2
 import lmdb
 import sys, os
 # change your caffe path here
-sys.path.insert(0, os.path.join('/home/zhecao/caffe/', 'python/'))
+sys.path.insert(0, os.path.join('/home/shaofeiw/Development/caffe/', 'python/'))
 import caffe
 import os.path
 import struct
+
+data_dir = '/media/data/datasets/coco/'
 
 def writeLMDB(datasets, lmdb_path, validation):
 	env = lmdb.open(lmdb_path, map_size=int(1e12))
@@ -19,7 +21,7 @@ def writeLMDB(datasets, lmdb_path, validation):
 	for d in range(len(datasets)):
 		if(datasets[d] == "MPI"):
 			print datasets[d]
-			with open('MPI.json') as data_file:	
+			with open('MPI.json') as data_file:
 				data_this = json.load(data_file)
 				data_this = data_this['root']
 				data = data + data_this
@@ -28,16 +30,16 @@ def writeLMDB(datasets, lmdb_path, validation):
 			print numSample
 		elif(datasets[d] == "COCO"):
 			print datasets[d]
-			with open('dataset/COCO/json/COCO.json') as data_file:
+			with open(os.path.join(data_dir, 'pose-paf/json/COCO.json')) as data_file:
 				data_this = json.load(data_file)
 				data_this = data_this['root']
 				data = data + data_this
 			numSample = len(data)
 			#print data
-			print numSample	
+			print numSample
 
 	random_order = np.random.permutation(numSample).tolist()
-	
+
 	isValidationArray = [data[i]['isValidation'] for i in range(numSample)];
 	if(validation == 1):
 		totalWriteCount = isValidationArray.count(0.0);
@@ -55,21 +57,21 @@ def writeLMDB(datasets, lmdb_path, validation):
 		if "MPI" in data[idx]['dataset']:
 			path_header = 'dataset/MPI/images/'
 		elif "COCO" in data[idx]['dataset']:
-			path_header = '/media/posenas4b/User/zhe/Convolutional-Pose-Machines/training/dataset/COCO/images/'
+			path_header = data_dir
 
-		print os.path.join(path_header, data[idx]['img_paths'])
-		img = cv2.imread(os.path.join(path_header, data[idx]['img_paths']))
+		print os.path.join(path_header, 'images/', data[idx]['img_paths'])
+		img = cv2.imread(os.path.join(path_header, 'images/', data[idx]['img_paths']))
 		#print data[idx]['img_paths']
 		img_idx = data[idx]['img_paths'][-16:-3];
 		#print img_idx
 		if "COCO_val" in data[idx]['dataset']:
-			mask_all = cv2.imread(path_header+'mask2014/val2014_mask_all_'+img_idx+'png', 0)
-			mask_miss = cv2.imread(path_header+'mask2014/val2014_mask_miss_'+img_idx+'png', 0)
-			#print path_header+'mask2014/val2014_mask_miss_'+img_idx+'png'
+			mask_all = cv2.imread(path_header+'pose-paf/mask2017/val2017_mask_all_'+img_idx+'png', 0)
+			mask_miss = cv2.imread(path_header+'pose-paf/mask2017/val2017_mask_miss_'+img_idx+'png', 0)
+			#print path_header+'mask2017/val2017_mask_miss_'+img_idx+'png'
 		elif "COCO" in data[idx]['dataset']:
-			mask_all = cv2.imread(path_header+'mask2014/train2014_mask_all_'+img_idx+'png', 0)
-			mask_miss = cv2.imread(path_header+'mask2014/train2014_mask_miss_'+img_idx+'png', 0)
-			#print path_header+'mask2014/train2014_mask_miss_'+img_idx+'png'
+			mask_all = cv2.imread(path_header+'pose-paf/mask2017/train2017_mask_all_'+img_idx+'png', 0)
+			mask_miss = cv2.imread(path_header+'pose-paf/mask2017/train2017_mask_miss_'+img_idx+'png', 0)
+			#print path_header+'mask2017/train2017_mask_miss_'+img_idx+'png'
 		elif "MPI" in data[idx]['dataset']:
 			img_idx = data[idx]['img_paths'][-13:-3];
 			#print img_idx
@@ -161,8 +163,8 @@ def writeLMDB(datasets, lmdb_path, validation):
 					for j in range(len(row_binary)):
 						meta_data[clidx][j] = ord(row_binary[j])
 					clidx = clidx + 1
-		
-		# print meta_data[0:12,0:48] 
+
+		# print meta_data[0:12,0:48]
 		# total 7+4*nop lines
 		if "COCO" in data[idx]['dataset']:
 			img4ch = np.concatenate((img, meta_data, mask_miss[...,None], mask_all[...,None]), axis=2)
@@ -172,7 +174,7 @@ def writeLMDB(datasets, lmdb_path, validation):
 
 		img4ch = np.transpose(img4ch, (2, 0, 1))
 		print img4ch.shape
-		
+
 		datum = caffe.io.array_to_datum(img4ch, label=0)
 		key = '%07d' % writeCount
 		txn.put(key, datum.SerializeToString())
@@ -192,4 +194,4 @@ def float2bytes(floats):
 
 if __name__ == "__main__":
 	#writeLMDB(['MPI'], '/home/zhecao/MPI_pose/lmdb', 1)
-	writeLMDB(['COCO'], '/home/zhecao/COCO_kpt/lmdb', 1)
+	writeLMDB(['COCO'], os.path.join(data_dir, 'pose-paf/lmdb'), 1)

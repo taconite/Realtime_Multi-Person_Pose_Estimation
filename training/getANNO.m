@@ -1,7 +1,8 @@
 dataType = '';
-addpath('dataset/COCO/coco/MatlabAPI');
+data_dir = '/media/data/datasets/coco/'
+addpath([data_dir 'cocoapi/MatlabAPI']);
 
-mkdir('dataset/COCO/mat')
+mkdir([data_dir 'pose-paf/mat'])
 
 annTypes = { 'instances', 'captions', 'person_keypoints' };
 annType=annTypes{3}; % specify dataType/annType
@@ -9,12 +10,12 @@ annType=annTypes{3}; % specify dataType/annType
 for mode = 0:1
     
     if mode == 0
-        dataType= 'val2014';
-        annFile=sprintf('dataset/COCO/annotations/%s_%s.json',annType,dataType);
+        dataType= 'val2017';
     else
-        dataType = 'train2014';
-        annFile=sprintf('dataset/COCO/annotations/%s_%s.json',annType,dataType);
+        dataType = 'train2017';
     end
+
+    annFile=sprintf([data_dir 'annotations/%s_%s.json'],annType,dataType);
     
     coco=CocoApi(annFile);
     %%
@@ -52,9 +53,9 @@ for mode = 0:1
     %%
     if mode == 0
         coco_val = coco_kpt;
-        save('dataset/COCO/mat/coco_val.mat', 'coco_val');
+        save([data_dir 'pose-paf/mat/coco_val.mat'], 'coco_val');
     else
-        save('dataset/COCO/mat/coco_kpt.mat', 'coco_kpt');
+        save([data_dir 'pose-paf/mat/coco_kpt.mat'], 'coco_kpt');
     end
     
 end

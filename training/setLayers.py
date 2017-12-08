@@ -9,7 +9,7 @@ from ConfigParser import SafeConfigParser
 # caffe_path = parser.get('caffe', 'path')
 # sys.path.append('%s/python' % caffe_path)
 
-caffe_path = '/home/zhecao/caffe_train/'
+caffe_path = '/home/shaofeiw/Development/caffe_train/'
 import sys, os
 sys.path.insert(0, os.path.join(caffe_path, 'python'))
 import caffe
@@ -32,7 +32,7 @@ def setLayers_twoBranches(data_source, batch_size, layername, kernel, stride, ou
             n.data, n.tops[label_name[0]], n.tops[label_name[1]] = L.HDF5Data(hdf5_data_param=dict(batch_size=batch_size, source=data_source), ntop=3)
     # produce data definition for deploy net
     elif deploy == False:
-        n.data, n.tops['label'] = L.CPMData(data_param=dict(backend=1, source=data_source, batch_size=batch_size), 
+        n.data, n.tops['label'] = L.CPMData(data_param=dict(backend=1, source=data_source, batch_size=batch_size),
                                                     cpm_transform_param=transform_param_in, ntop=2)
         n.tops[label_name[2]], n.tops[label_name[3]], n.tops[label_name[4]], n.tops[label_name[5]] = L.Slice(n.label, slice_param=dict(axis=1, slice_point=[38, num_parts+1, num_parts+39]), ntop=4)
         n.tops[label_name[0]] = L.Eltwise(n.tops[label_name[2]], n.tops[label_name[4]], operation=P.Eltwise.PROD)
@@ -111,7 +111,7 @@ def setLayers_twoBranches(data_source, batch_size, layername, kernel, stride, ou
                 if(state == 'image'):
                     if(batchnorm == 1):
                         batchnorm_name = 'bn%d_stage%d' % (conv_counter, stage)
-                        n.tops[batchnorm_name] = L.BatchNorm(n.tops[last_layer[0]], 
+                        n.tops[batchnorm_name] = L.BatchNorm(n.tops[last_layer[0]],
                                                              param=[dict(lr_mult=0), dict(lr_mult=0), dict(lr_mult=0)])
                                                              #scale_filler=dict(type='constant', value=1), shift_filler=dict(type='constant', value=0.001))
                         last_layer[0] = batchnorm_name
@@ -121,7 +121,7 @@ def setLayers_twoBranches(data_source, batch_size, layername, kernel, stride, ou
                 else:
                     if(batchnorm == 1):
                         batchnorm_name = 'Mbn%d_stage%d' % (conv_counter, stage)
-                        n.tops[batchnorm_name] = L.BatchNorm(n.tops[last_layer[0]], 
+                        n.tops[batchnorm_name] = L.BatchNorm(n.tops[last_layer[0]],
                                                              param=[dict(lr_mult=0), dict(lr_mult=0), dict(lr_mult=0)])
                                                              #scale_filler=dict(type='constant', value=1), shift_filler=dict(type='constant', value=0.001))
                         last_layer[0] = batchnorm_name
@@ -168,7 +168,7 @@ def setLayers_twoBranches(data_source, batch_size, layername, kernel, stride, ou
                     if(state == 'image'):
                         if(batchnorm == 1):
                             batchnorm_name = 'bn%d_stage%d_L%d' % (conv_counter, stage, level+1)
-                            n.tops[batchnorm_name] = L.BatchNorm(n.tops[last_layer[level]], 
+                            n.tops[batchnorm_name] = L.BatchNorm(n.tops[last_layer[level]],
                                                                  param=[dict(lr_mult=0), dict(lr_mult=0), dict(lr_mult=0)])
                                                                  #scale_filler=dict(type='constant', value=1), shift_filler=dict(type='constant', value=0.001))
                             last_layer[level] = batchnorm_name
@@ -178,7 +178,7 @@ def setLayers_twoBranches(data_source, batch_size, layername, kernel, stride, ou
                     else:
                         if(batchnorm == 1):
                             batchnorm_name = 'Mbn%d_stage%d_L%d' % (conv_counter, stage, level+1)
-                            n.tops[batchnorm_name] = L.BatchNorm(n.tops[last_layer[level]], 
+                            n.tops[batchnorm_name] = L.BatchNorm(n.tops[last_layer[level]],
                                                                  param=[dict(lr_mult=0), dict(lr_mult=0), dict(lr_mult=0)])
                                                                  #scale_filler=dict(type='constant', value=1), shift_filler=dict(type='constant', value=0.001))
                             last_layer[level] = batchnorm_name
@@ -188,7 +188,7 @@ def setLayers_twoBranches(data_source, batch_size, layername, kernel, stride, ou
 
             conv_counter += 1
             local_counter += 1
-            
+
 
         elif layername[l] == 'P': # Pooling
             n.tops['pool%d_stage%d' % (pool_counter, stage)] = L.Pooling(n.tops[last_layer[0]], kernel_size=kernel[l], stride=stride[l], pool=P.Pooling.MAX)
@@ -208,7 +208,7 @@ def setLayers_twoBranches(data_source, batch_size, layername, kernel, stride, ou
                 name = 'weight_stage%d' % stage
                 n.tops[name] = L.Eltwise(n.tops[last_layer[level]], n.tops[label_name[(level+2)]], operation=P.Eltwise.PROD)
                 n.tops['loss_stage%d' % stage] = L.EuclideanLoss(n.tops[name], n.tops[label_name[level]])
-                
+
             print 'loss %d' % stage
             stage += 1
             conv_counter = 1
@@ -231,7 +231,7 @@ def setLayers_twoBranches(data_source, batch_size, layername, kernel, stride, ou
                     n.tops['loss_stage%d_L%d' % (stage, level+1)] = L.EuclideanLoss(n.tops[name], n.tops[label_name[level]], loss_weight=weight[level])
 
                 print 'loss %d level %d' % (stage, level+1)
-            
+
             stage += 1
             #last_connect = last_layer
             #last_layer = 'image'
@@ -252,7 +252,7 @@ def setLayers_twoBranches(data_source, batch_size, layername, kernel, stride, ou
                 level = 1
                 n.tops['loss_stage%d_L%d' % (stage, level+1)] = L.EuclideanLoss(n.tops[last_layer[level]], n.tops[label_name[level]], loss_weight=weight[level])
                 print 'loss %d level %d' % (stage, level+1)
-            
+
             stage += 1
             #last_connect = last_layer
             #last_layer = 'image'
@@ -270,7 +270,7 @@ def setLayers_twoBranches(data_source, batch_size, layername, kernel, stride, ou
             #if not share_point:
             #    share_point = last_layer
             n.tops['concat_stage%d' % stage] = L.Concat(n.tops[last_layer[0]], n.tops[last_layer[1]], n.tops[share_point], concat_param=dict(axis=1))
-            
+
             local_counter = 1
             state = 'fuse'
             last_layer[0] = 'concat_stage%d' % stage
@@ -384,7 +384,7 @@ def calcAndWriteStat(sub_dir, layername, kernel, stride, outCH, args):
 
         # for all non-in-place feature map, cpu_data and cpu_diff
         if layername[l] != 'D' and layername[l] != 'L' and layername[l] != '@':
-            mem += current_x * current_y * outCH[l] * 4 * 2 
+            mem += current_x * current_y * outCH[l] * 4 * 2
         print 'LAYER %s | mem: %d, flop: %d, nparam: %d, current_ch: %d' % (layername[l], mem, flop-last_flop, nparam, current_ch)
         last_flop = flop
 
@@ -443,13 +443,15 @@ if __name__ == "__main__":
     batch_size = 8
     args.batch_size = batch_size
 
+    data_dir = '/media/data/datasets/coco/'
+
     # Two branch: weight = 1, scale 0.5~1.1, fix the mode, base_lr = 4e-5, batch_size = 10
     if(exp == 1):
         directory = 'COCO_exp_caffe/pose56/exp22/'
-        serverFolder = '/home/zhecao/COCO_kpt/pose56/exp22'
-        base_folder = '/media/posenas4b/User/zhe/arch/'+directory+'model'
-        dataFolder = '/home/zhecao/COCO_kpt/lmdb_trainVal'
-        source = '/home/zhecao/COCO_kpt/lmdb_trainVal'
+        serverFolder = os.path.join(data_dir, 'pose-paf/COCO_kpt/pose56/exp22')
+        base_folder = os.path.join(data_dir, 'pose-paf/arch/', directory, 'model/')
+        dataFolder = os.path.join(data_dir, 'pose-paf/lmdb')
+        source = os.path.join(data_dir, 'pose-paf/lmdb')
         base_lr = 4e-5   # 2e-5
         batch_size = 10
         np = 56    # num_parts
@@ -475,7 +477,7 @@ if __name__ == "__main__":
                 kernel +=    [ 0 ] + [ 7 ] * 5 + [1,1]  +  [ 0 ]
                 outCH +=     [ 0 ] + [128] * 6 + [np*2] +  [ 0 ]
                 stride +=    [ 0 ] + [ 1 ] * 7          +  [ 0 ]
-                   
+
             sub_dir = directory
             d_caffemodel = base_folder
             if not os.path.exists(sub_dir):
